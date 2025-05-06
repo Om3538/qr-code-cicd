@@ -1,26 +1,39 @@
 pipeline {
     agent any
+
     stages {
-        stage('Clone GITHUB Repository') {
+        stage('Clone') {
             steps {
-                checkout scm
-            }
-        }
-        stage('Copy source code to Docker swarm') {
-            steps {
-                sh 'ansible-playbook playbook-to-copy-data-to-docker.yml --user=jenkins'
+                git 'https://github.com/Om3538/qr-code-cicd.git'
             }
         }
 
-        stage('Build & Push the new Image to Dockerhub') {
+        stage('Install Dependencies') {
             steps {
-                sh 'ansible-playbook playbook-to-push.yml --user=jenkins'
+                sh 'pip install -r requirements.txt'
             }
         }
 
-        stage('Deploying new Service in Docker Swarm') {
+        stage('Test') {
             steps {
-                sh 'ansible-playbook playbook-for-deployment.yml --user=jenkins'
+                // optional: if you have tests
+                sh 'pytest || echo "No tests found"'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building project...'
+                // your custom build step (if needed)
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
+                // example:
+                // sh 'scp -i key.pem app.py ubuntu@ip:/var/www/html/'
+                // OR docker build and push
             }
         }
     }
